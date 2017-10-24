@@ -1,8 +1,9 @@
-/*import path for easy paths*/
 const http = require('http');
 const path = require('path');
 const express = require('express');
 const socket_io = require('socket.io');
+
+const {generate_message} = require('./utils/message');
 
 const public_path = path.join(__dirname, '../public');
 const port = process.env.PORT || 3000;
@@ -15,25 +16,13 @@ app.use(express.static(public_path));
 
 io.on('connection', (socket) =>{
     console.log('new user connected');
-    socket.emit('notification', {
-        from: 'admin',
-        text: 'welcome to the chat',
-        created_at:new Date().getTime()
-    });
+    socket.emit('notification', generate_message('admin', 'welcome to chat app'));
     
-    socket.broadcast.emit('notification',{
-        from: 'admin',
-        text: 'new user joined',
-        created_at:new Date().getTime()
-    });
+    socket.broadcast.emit('notification',generate_message('admin', 'new user joined'));
     
     socket.on('create_message', (new_message) =>{
         console.log(new_message);
-        io.emit('new_message',{
-            from: new_message.from,
-            text: new_message.text,
-            created_at:new Date().getTime()
-        });
+        io.emit('new_message',generate_message(new_message.from, new_message.text));
         /*socket.broadcast.emit('new_message',{
             from: new_message.from,
             text: new_message.text,
